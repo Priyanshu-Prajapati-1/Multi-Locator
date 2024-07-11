@@ -1,5 +1,6 @@
 package com.example.multilocator.screens.home
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerDefaults.flingBehavior
 import androidx.compose.foundation.pager.PagerSnapDistance
@@ -38,7 +40,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.multilocator.components.utils.Colors
 import com.example.multilocator.components.utils.ShadedBox
@@ -69,12 +73,15 @@ fun HomeScreenPager(
     groupInfo: (String, String) -> Unit,
 ) {
 
-    val isMenuClicked = rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier
+                    .size(50.dp),
                 shape = CircleShape,
+                containerColor = Color.Green.copy(alpha = 0.2f),
                 onClick = {
                     scope.launch {
                         pagerState.animateScrollToPage(1)
@@ -108,7 +115,7 @@ fun HomeScreenPager(
                             )
                         }
                         IconButton(onClick = {
-                            isMenuClicked.value = !isMenuClicked.value
+                            Toast.makeText(context, "Not Implemented Yet", Toast.LENGTH_SHORT).show()
                         }) {
                             Icon(
                                 imageVector = Icons.Default.Menu,

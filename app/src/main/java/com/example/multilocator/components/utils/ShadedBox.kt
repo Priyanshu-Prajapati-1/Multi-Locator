@@ -31,8 +31,9 @@ fun ShadedBox(
     ) {
         Text(
             text = text,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f),
             style = TextStyle(
-                fontSize = MaterialTheme.typography.headlineSmall.fontSize
+                fontSize = MaterialTheme.typography.headlineSmall.fontSize,
             )
         )
     }

@@ -10,6 +10,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,6 +30,7 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.Button
@@ -71,6 +73,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.example.multilocator.R
+import com.example.multilocator.components.utils.parseLatLong
 import com.example.multilocator.model.DataOrException
 import com.example.multilocator.model.GroupInfo
 import com.example.multilocator.model.User
@@ -136,7 +139,6 @@ fun HomeScreen(
         userGroups.value.data?.let { viewModel.getGroupInfo(it) }
     }
 
-    Log.d("currentLocation", currentLocation.value.toString())
 
     /*Log.d("userGroups", userGroups.value.data.toString())
     Log.d("userGroupsInfo", userGroupsInfo.value.data.toString())
@@ -306,7 +308,11 @@ fun HomeScreen(
 
 
 @Composable
-fun UserRow(user: UserInfo) {
+fun UserRow(
+    user: UserInfo,
+    isGroup: Boolean = false,
+    delete: () -> Unit = {}
+) {
 
     val imageUrl = if (user.profilePic.isNullOrEmpty()) R.drawable.person else user.profilePic
 
@@ -315,32 +321,51 @@ fun UserRow(user: UserInfo) {
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f))
             .padding(horizontal = 0.dp, vertical = 5.dp),
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
 
-        Spacer(modifier = Modifier.width(10.dp))
+        Row(
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
 
-        SubcomposeAsyncImage(
-            modifier = Modifier
-                .size(35.dp)
-                .clip(CircleShape),
-            contentScale = ContentScale.Crop,
-            loading = {
+            Spacer(modifier = Modifier.width(10.dp))
+            SubcomposeAsyncImage(
+                modifier = Modifier
+                    .size(35.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop,
+                loading = {
 
-                CircularProgressIndicator(
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .size(25.dp)
+                            .padding(8.dp),
+                        strokeWidth = 1.5.dp
+                    )
+                },
+                model = imageUrl, contentDescription = null
+            )
+            Text(
+                fontSize = 18.sp,
+                text = "   " + user.username.toString()
+            )
+        }
+
+        Row {
+            if (isGroup) {
+                Icon(
                     modifier = Modifier
-                        .size(25.dp)
-                        .padding(8.dp),
-                    strokeWidth = 1.5.dp
+                        .clickable {
+                            delete()
+                        }
+                        .padding(horizontal = 10.dp),
+                    imageVector = Icons.Default.Delete, contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
                 )
-            },
-            model = imageUrl, contentDescription = null
-        )
-        Text(
-            fontSize = 18.sp,
-            text = "   " + user.username.toString()
-        )
+            }
+        }
     }
 }
 

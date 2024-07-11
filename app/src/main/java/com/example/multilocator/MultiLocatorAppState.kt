@@ -19,7 +19,7 @@ class MultiLocatorAppState (val navController: NavHostController){
         navController.navigate(route){
             launchSingleTop = true
             popUpTo(popUp){
-                inclusive = false
+                inclusive = true
             }
         }
     }

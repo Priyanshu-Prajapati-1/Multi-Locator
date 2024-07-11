@@ -342,6 +342,7 @@ fun PasswordInput(
         shape = RoundedCornerShape(size = corner),
         enabled = enabled,
         modifier = modifier,
+        singleLine = true,
         visualTransformation = visualTransformation,
         trailingIcon = {
             PasswordVisibility(passwordVisibility = passwordVisibility)

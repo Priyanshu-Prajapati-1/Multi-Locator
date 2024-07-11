@@ -20,7 +20,15 @@ class UserUniqueIdRepository @Inject constructor(
         return dataStoreKey.getUserName("username")
     }
 
-    suspend fun saveUserName(uniqueId: String) {
-        dataStoreKey.saveUserName("username", uniqueId)
+    suspend fun saveUserName(name: String) {
+        dataStoreKey.saveUserName("username", name)
+    }
+
+    fun getUserLastLocation(): Flow<String?> {
+        return dataStoreKey.getUserLastLocation("lastLocation")
+    }
+
+    suspend fun saveUserLastLocation(lastLocation: String) {
+        dataStoreKey.saveUserLastLocation("lastLocation", lastLocation)
     }
 }

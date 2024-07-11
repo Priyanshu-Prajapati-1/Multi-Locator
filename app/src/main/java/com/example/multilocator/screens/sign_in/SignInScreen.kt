@@ -163,7 +163,7 @@ fun SignInScreen(
                                 modifier = Modifier.size(25.dp)
                             )
                         } else {
-                            Text(text = "Sign Up")
+                            Text(text = "Sign In")
                         }
                     }
 

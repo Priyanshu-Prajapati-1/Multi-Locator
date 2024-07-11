@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.multilocator.R
-import com.example.multilocator.components.utils.Colors
 import com.example.multilocator.model.DataOrException
 import com.example.multilocator.model.GroupInfo
 import com.example.multilocator.model.UserInfo
@@ -268,7 +267,7 @@ fun ShowGroupUsers(
                             .clip(RoundedCornerShape(10.dp))
                     ) {
                         getGroupUserWithName.value.data?.forEach {
-                            UserRow(user = it.value)
+                            UserRow(user = it.value, isGroup = false)
                         }
                     }
 

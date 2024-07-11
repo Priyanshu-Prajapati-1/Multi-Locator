@@ -18,6 +18,7 @@ class DataStoreKey @Inject constructor(@ApplicationContext private val context: 
     companion object {
         private val Context.uniqueIdDataStore: DataStore<Preferences> by preferencesDataStore(name = "userUniqueId")
         private val Context.userNameDataStore: DataStore<Preferences> by preferencesDataStore(name = "userName")
+        private val Context.userLastLocation: DataStore<Preferences> by preferencesDataStore(name = "userLastLocation")
     }
 
     fun getUniqueId(key: String): Flow<String?> {
@@ -40,6 +41,18 @@ class DataStoreKey @Inject constructor(@ApplicationContext private val context: 
 
     suspend fun saveUserName(key: String, value: String) {
         context.userNameDataStore.edit { preferences ->
+            preferences[stringPreferencesKey(key)] = value
+        }
+    }
+
+    fun getUserLastLocation(key: String): Flow<String?> {
+        return context.userLastLocation.data.map { preferences ->
+            preferences[stringPreferencesKey(key)] ?: ""
+        }
+    }
+
+    suspend fun saveUserLastLocation(key: String, value: String) {
+        context.userLastLocation.edit { preferences ->
             preferences[stringPreferencesKey(key)] = value
         }
     }

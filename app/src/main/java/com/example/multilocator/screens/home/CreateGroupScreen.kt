@@ -53,10 +53,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import coil.compose.AsyncImage
+import coil.compose.SubcomposeAsyncImage
 import com.example.multilocator.R
 import com.example.multilocator.model.UserInfo
-import com.google.firebase.auth.FirebaseAuth
 
 @Composable
 fun CreateGroup(
@@ -101,6 +100,7 @@ fun CreateGroup(
             textStyle = TextStyle(
                 fontSize = 15.sp
             ),
+            singleLine = true,
             value = groupName.value,
             onValueChange = {
                 groupName.value = it
@@ -144,7 +144,7 @@ fun CreateGroup(
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
 
-                        AsyncImage(
+                        SubcomposeAsyncImage(
                             modifier = Modifier
                                 .size(35.dp)
                                 .clip(CircleShape),
@@ -253,14 +253,20 @@ fun CreateGroup(
                     )
                 )
                 .padding(6.dp)
+                .clip(RoundedCornerShape(10.dp))
                 .border(
-                    1.dp,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                    0.2.dp,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.3f),
                     RoundedCornerShape(10.dp)
                 )
         ) {
             userList.distinct().forEach { user ->
-                UserRow(user = user)
+                UserRow(
+                    user = user,
+                    isGroup = true
+                ) {
+                    userList.remove(user)
+                }
             }
         }
         if (showDialog.value) {

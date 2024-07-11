@@ -99,7 +99,6 @@ fun MapScreenPager(
     val uniqueId = userUniqueIdViewModel.uniqueId.collectAsStateWithLifecycle()
     val username = userUniqueIdViewModel.username.collectAsStateWithLifecycle()
     val userLocationsList = mapViewModel.userLocations.collectAsStateWithLifecycle()
-    //Log.d("MapScreenPager", "MapScreenPager: ${userLocationsList.value}")
 
     val mapProperty = remember { mutableStateOf(MapProperties(mapType = MapType.HYBRID)) }
     val mapUiSetting = remember { mutableStateOf(MapUiSettings()) }
@@ -165,7 +164,7 @@ fun MapScreenPager(
     }
 
     LaunchedEffect(key1 = onShareLocation.value) {
-        if(groupId.value != ""){
+        if (groupId.value != "") {
             mapViewModel.updateUserSharingLocation(
                 groupId = groupId.value,
                 userId = uniqueId.value,

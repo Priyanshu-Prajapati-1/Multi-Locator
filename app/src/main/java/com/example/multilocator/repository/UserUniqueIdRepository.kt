@@ -1,5 +1,6 @@
 package com.example.multilocator.repository
 
+import android.util.Log
 import com.example.multilocator.data.DataStoreKey
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
@@ -9,26 +10,42 @@ class UserUniqueIdRepository @Inject constructor(
 ) {
 
     fun getUserUniqueId(): Flow<String?> {
-        return dataStoreKey.getUniqueId("uniqueId")
+        return dataStoreKey.getUniqueId()
     }
 
     suspend fun saveUserUniqueId(uniqueId: String) {
-        dataStoreKey.saveUniqueId("uniqueId", uniqueId)
+        dataStoreKey.saveUniqueId(uniqueId)
     }
 
     fun getUserName(): Flow<String?> {
-        return dataStoreKey.getUserName("username")
+        return dataStoreKey.getUserName()
     }
 
     suspend fun saveUserName(name: String) {
-        dataStoreKey.saveUserName("username", name)
+        dataStoreKey.saveUserName(name)
     }
 
-    fun getUserLastLocation(): Flow<String?> {
-        return dataStoreKey.getUserLastLocation("lastLocation")
+    fun getGroupId(): Flow<String?> {
+        return dataStoreKey.getGroupId()
     }
 
-    suspend fun saveUserLastLocation(lastLocation: String) {
-        dataStoreKey.saveUserLastLocation("lastLocation", lastLocation)
+    suspend fun saveGroupId(groupId: String) {
+        dataStoreKey.saveGroupId(groupId)
+    }
+
+    fun getGroupName(): Flow<String?> {
+        return dataStoreKey.getGroupName()
+    }
+
+    suspend fun saveGroupName(groupName: String) {
+        dataStoreKey.saveGroupName(groupName)
+    }
+
+    fun getUserSharingLocation(): Flow<Boolean?> {
+        return dataStoreKey.getUserSharingLocation()
+    }
+
+    suspend fun saveUserSharingLocation(isShare: Boolean) {
+        dataStoreKey.saveUserSharingLocation(isShare)
     }
 }

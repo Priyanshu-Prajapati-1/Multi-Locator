@@ -58,7 +58,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -98,15 +97,23 @@ fun MapScreenPager(
 
     val uniqueId = userUniqueIdViewModel.uniqueId.collectAsStateWithLifecycle()
     val username = userUniqueIdViewModel.username.collectAsStateWithLifecycle()
+    val currentGroupId = userUniqueIdViewModel.groupId.collectAsStateWithLifecycle()
+    val isSharingLocation = userUniqueIdViewModel.isSharingLocation.collectAsStateWithLifecycle()
     val userLocationsList = mapViewModel.userLocations.collectAsStateWithLifecycle()
+
+    Log.d(
+        "M id, groupId, username, isSharingLocation",
+        "MapScreenPager: ${uniqueId.value}, ${currentGroupId.value}, ${username.value}, ${isSharingLocation.value}"
+    )
+
+    // Log.d("id , name", "MapScreenPager: ${uniqueId.value}, ${username.value}")
+    //Log.d("location", "MapScreenPager: ${userLocationsList.value}")
 
     val mapProperty = remember { mutableStateOf(MapProperties(mapType = MapType.HYBRID)) }
     val mapUiSetting = remember { mutableStateOf(MapUiSettings()) }
     val showDialog = remember { mutableStateOf(false) }
     val showMapMenu = remember { mutableStateOf(false) }
     val context = LocalContext.current
-
-    val onShareLocation = rememberSaveable { mutableStateOf(false) }
 
     val defaultCameraPosition by remember {
         mutableStateOf(CameraPosition.fromLatLngZoom(currentLocation.value, 1f))
@@ -135,17 +142,17 @@ fun MapScreenPager(
     }
 
     LaunchedEffect(key1 = currentLocation.value, key2 = uniqueId.value) {
-        if (onShareLocation.value) {
+        if (isSharingLocation.value) {
             mapViewModel.updateUserLocation(
                 uniqueId = uniqueId.value,
                 location = currentLocation.value,
-                isSharingLocation = onShareLocation.value
+                isSharingLocation = isSharingLocation.value
             )
         }
     }
 
     LaunchedEffect(key1 = currentLocation.value, key2 = groupId.value) {
-        if (onShareLocation.value) {
+        if (isSharingLocation.value) {
             if (groupId.value != "") {
                 Log.d("MapScreenPager", "MapScreenPager: ${groupId.value}")
                 mapViewModel.updateUserLocationInGroup(
@@ -153,22 +160,22 @@ fun MapScreenPager(
                     userId = uniqueId.value,
                     username = username.value,
                     location = currentLocation.value,
-                    isSharingLocation = onShareLocation.value
+                    isSharingLocation = isSharingLocation.value
                 )
             }
         }
     }
 
-    LaunchedEffect(key1 = onShareLocation.value) {
-        mapViewModel.sharingLocation(uniqueId.value, onShareLocation.value)
+    LaunchedEffect(key1 = isSharingLocation.value) {
+        mapViewModel.sharingLocation(uniqueId.value, isSharingLocation.value)
     }
 
-    LaunchedEffect(key1 = onShareLocation.value) {
+    LaunchedEffect(key1 = isSharingLocation.value) {
         if (groupId.value != "") {
             mapViewModel.updateUserSharingLocation(
                 groupId = groupId.value,
                 userId = uniqueId.value,
-                isShare = onShareLocation.value
+                isShare = isSharingLocation.value
             )
         }
     }
@@ -201,7 +208,7 @@ fun MapScreenPager(
                             Text(
                                 fontSize = 16.sp,
                                 lineHeight = 20.sp,
-                                text = groupName.value
+                                text = if (groupName.value == "") "No Group Selected" else groupName.value
                             )
                         }
                     },
@@ -299,30 +306,28 @@ fun MapScreenPager(
                                 icon = BitmapDescriptorFactory.defaultMarker(
                                     if (location.isSharingLocation == true) BitmapDescriptorFactory.HUE_GREEN else BitmapDescriptorFactory.HUE_RED
                                 ),
-                                onClick = { _ ->
+                                onClick = {
                                     showUserDetails.value = true
                                     userSharingLocation.value = location.isSharingLocation == true
                                     mapViewModel.getUserById(location.userId.toString())
                                     return@MarkerInfoWindow false
                                 },
-                                content = {
-                                    Column(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(
-                                                MaterialTheme.colorScheme.background.copy(
-                                                    alpha = 0.9f
-                                                )
+                            ) {
+                                Column(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(
+                                            MaterialTheme.colorScheme.background.copy(
+                                                alpha = 0.9f
                                             )
-                                            .padding(horizontal = 5.dp)
-                                    ) {
-                                        if (location.username?.isNotEmpty() == true) {
-                                            Text(text = location.username.toString())
-                                        }
+                                        )
+                                        .padding(horizontal = 5.dp)
+                                ) {
+                                    if (location.username?.isNotEmpty() == true) {
+                                        Text(text = location.username.toString())
                                     }
-                                },
-                                visible = true
-                            )
+                                }
+                            }
                         }
                     }
                 }
@@ -334,15 +339,12 @@ fun MapScreenPager(
                         .background(Color.Transparent)
                 ) {
 
-                    GroupSelected(
-                        groupName = groupName
-                    )
-
                     OnMapControls(
                         modifier = Modifier
                             .align(Alignment.TopEnd),
+                        userUniqueIdViewModel = userUniqueIdViewModel,
                         showMapMenu = showMapMenu,
-                        onShareLocation = onShareLocation
+                        onShareLocation = isSharingLocation
                     )
 
                     BottomSheetForMapType(
@@ -373,36 +375,13 @@ fun MapScreenPager(
     }
 }
 
-@Composable
-fun GroupSelected(
-    modifier: Modifier = Modifier,
-    groupName: State<String>
-) {
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .clip(RoundedCornerShape(50))
-            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.7f))
-    ) {
-        AnimatedVisibility(visible = groupName.value.isEmpty()) {
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                fontSize = 12.sp,
-                text = "No   Group Selected"
-            )
-        }
-    }
-
-}
 
 @Composable
 fun OnMapControls(
     modifier: Modifier,
+    userUniqueIdViewModel: UserUniqueIdViewModel,
     showMapMenu: MutableState<Boolean>,
-    onShareLocation: MutableState<Boolean>,
+    onShareLocation: State<Boolean>,
 ) {
 
     Column(
@@ -435,7 +414,7 @@ fun OnMapControls(
                 Switch(
                     checked = onShareLocation.value,
                     onCheckedChange = {
-                        onShareLocation.value = it
+                        userUniqueIdViewModel.saveUserSharingLocation(it)
                     },
                     thumbContent = if (onShareLocation.value) {
                         {

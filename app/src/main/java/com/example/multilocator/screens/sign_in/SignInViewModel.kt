@@ -47,9 +47,9 @@ class SignInViewModel @Inject constructor(
                 if (FirebaseAuth.getInstance().uid != null) {
                     fireBaseRepository.getUserUniqueId() { id, name ->
                         launchCatching {
-                            Log.d("id", id)
-                            userUniqueIdRepository.saveUserUniqueId(id)
-                            userUniqueIdRepository.saveUserName(name)
+                            Log.d("id", "$id, $name")
+                            userUniqueIdRepository.saveUserName(name = name)
+                            userUniqueIdRepository.saveUserUniqueId(uniqueId = id)
                             errorMessage.value = null
                             isLoading.value = false
                             openAndPopUp(

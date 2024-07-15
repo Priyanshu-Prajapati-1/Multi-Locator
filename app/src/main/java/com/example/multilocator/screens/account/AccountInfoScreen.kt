@@ -66,6 +66,7 @@ import com.example.multilocator.R
 import com.example.multilocator.components.utils.Colors
 import com.example.multilocator.model.DataOrException
 import com.example.multilocator.model.UserInfo
+import com.example.multilocator.screens.viewModel.LocationViewModel
 import com.example.multilocator.screens.viewModel.UserUniqueIdViewModel
 import com.google.firebase.storage.FirebaseStorage
 

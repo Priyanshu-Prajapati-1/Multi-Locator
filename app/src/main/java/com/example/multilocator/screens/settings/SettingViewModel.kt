@@ -1,6 +1,7 @@
 package com.example.multilocator.screens.settings
 
 import com.example.multilocator.navigation.MultiLocatorScreens
+import com.example.multilocator.repository.UserUniqueIdRepository
 import com.example.multilocator.screens.MultiLocatorViewModel
 import com.example.multilocator.service.AccountService
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,7 +11,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingViewModel @Inject constructor(
-    private val accountService: AccountService
+    private val accountService: AccountService,
+    private val userUniqueIdRepository: UserUniqueIdRepository
 ) : MultiLocatorViewModel() {
 
     private val _isDeleteAccount: MutableStateFlow<Boolean> = MutableStateFlow(false)
@@ -50,4 +52,11 @@ class SettingViewModel @Inject constructor(
         )
     }
 
+    fun emptyGroupInfo() {
+        launchCatching {
+            userUniqueIdRepository.saveGroupId("").apply {
+                userUniqueIdRepository.saveGroupName("")
+            }
+        }
+    }
 }

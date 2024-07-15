@@ -26,7 +26,6 @@ class FireBaseRepository @Inject constructor() {
     val database = Firebase.database
     val storage = FirebaseStorage.getInstance()
 
-
     private var _userGroups = MutableStateFlow<DataOrException<List<String>?, Boolean, Exception>>(
         DataOrException(null, false, Exception(""))
     )

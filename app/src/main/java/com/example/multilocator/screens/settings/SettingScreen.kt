@@ -46,6 +46,8 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.multilocator.components.utils.Colors
+import com.example.multilocator.screens.viewModel.LocationViewModel
+import com.example.multilocator.screens.viewModel.UserUniqueIdViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -53,6 +55,7 @@ import com.example.multilocator.components.utils.Colors
 fun SettingScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingViewModel = hiltViewModel(),
+    locationViewModel: LocationViewModel = hiltViewModel(),
     openScreen: (String) -> Unit,
     openAndPopUp: (String, String) -> Unit,
     popUp: () -> Unit
@@ -114,6 +117,8 @@ fun SettingScreen(
                         icon = Icons.AutoMirrored.Default.ExitToApp,
                         settingName = "Logout"
                     ) {
+                        locationViewModel.stopLocationUpdates()
+                        viewModel.emptyGroupInfo()
                         viewModel.logout(openAndPopUp)
                     }
                     SettingItem(
@@ -138,6 +143,7 @@ fun SettingScreen(
             showDialog = showDialog,
             isDeleteAccount = isDeleteAccount
         ) {
+            locationViewModel.stopLocationUpdates()
             viewModel.deleteAccount({ value ->
                 showDialog.value = value
             }, openAndPopUp)

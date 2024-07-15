@@ -12,7 +12,7 @@ plugins {
 
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 
-  //  id("com.google.firebase.crashlytics")
+    //  id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -112,19 +112,21 @@ dependencies {
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-storage")
-   // implementation("com.google.firebase:firebase-crashlytics")
+    // implementation("com.google.firebase:firebase-crashlytics")
 
     //map
     implementation("com.google.maps.android:maps-compose:4.4.1")
     implementation("com.google.maps.android:maps-compose-utils:4.3.3")
     implementation("com.google.maps.android:maps-compose-widgets:4.3.3")
     // Maps SDK for Android
-    implementation ("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
     // location
     implementation("com.google.android.gms:play-services-location:21.3.0")
 
     //naviagation
     implementation("androidx.navigation:navigation-compose:2.7.7")
+    // add ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.3")
 
     // hilt
     implementation("com.google.dagger:hilt-android:2.49")
@@ -150,7 +152,7 @@ dependencies {
     // lifeCycle
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
 
-   // implementation ("androidx.compose.material:material-icons-extended:1.6.8")
+    // implementation ("androidx.compose.material:material-icons-extended:1.6.8")
     implementation("com.google.code.gson:gson:2.10.1")
 
     // Location Permission
@@ -167,4 +169,14 @@ dependencies {
 
     // lottie
     implementation("com.airbnb.android:lottie-compose:6.4.0")
+
+    // Flogger
+    implementation("com.google.flogger:flogger:0.7.4")
+    implementation("com.google.flogger:flogger-system-backend:0.7.4")
+    implementation("com.google.flogger:google-extensions:0.7.4")
+    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-simple:1.7.30")
+
+    // event bus
+    implementation("org.greenrobot:eventbus:3.3.1")
 }

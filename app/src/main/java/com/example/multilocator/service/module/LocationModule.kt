@@ -1,5 +1,6 @@
 package com.example.multilocator.service.module
 
+import android.app.Application
 import android.content.Context
 import com.example.multilocator.service.ILocationService
 import com.example.multilocator.service.impl.LocationService
@@ -21,9 +22,13 @@ object LocationModule {
     fun provideLocationClient(
         @ApplicationContext context: Context
     ): ILocationService = LocationService(
-
         context,
         LocationServices.getFusedLocationProviderClient(context)
     )
 
+    @Provides
+    @Singleton
+    fun provideContext(application: Application): Context {
+        return application.applicationContext
+    }
 }

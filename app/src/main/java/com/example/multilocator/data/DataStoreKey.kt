@@ -1,8 +1,10 @@
 package com.example.multilocator.data
 
 import android.content.Context
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -15,45 +17,81 @@ import javax.inject.Singleton
 @Singleton
 class DataStoreKey @Inject constructor(@ApplicationContext private val context: Context) {
 
-    companion object {
+    private companion object {
         private val Context.uniqueIdDataStore: DataStore<Preferences> by preferencesDataStore(name = "userUniqueId")
         private val Context.userNameDataStore: DataStore<Preferences> by preferencesDataStore(name = "userName")
-        private val Context.userLastLocation: DataStore<Preferences> by preferencesDataStore(name = "userLastLocation")
+        private val Context.currentGroupId: DataStore<Preferences> by preferencesDataStore(name = "currentGroupId")
+        private val Context.isSharingLocationStore: DataStore<Preferences> by preferencesDataStore(
+            name = "isSharingLocation"
+        )
+        private val Context.currentGroupName: DataStore<Preferences> by preferencesDataStore(
+            name = "currentGroupName"
+        )
+
+        val USER_UNIQUE_ID = stringPreferencesKey("uniqueId")
+        val USER_NAME = stringPreferencesKey("username")
+        val CURRENT_GROUP_ID = stringPreferencesKey("groupId")
+        val CURRENT_GROUP_NAME = stringPreferencesKey("groupName")
+        val IS_SHARING_LOCATION = booleanPreferencesKey("isShare")
     }
 
-    fun getUniqueId(key: String): Flow<String?> {
+    fun getUniqueId(): Flow<String?> {
         return context.uniqueIdDataStore.data.map { preferences ->
-            preferences[stringPreferencesKey(key)] ?: ""
+            preferences[USER_UNIQUE_ID] ?: ""
         }
     }
 
-    suspend fun saveUniqueId(key: String, value: String) {
+    suspend fun saveUniqueId(userUniqueId: String) {
         context.uniqueIdDataStore.edit { preferences ->
-            preferences[stringPreferencesKey(key)] = value
+            preferences[USER_UNIQUE_ID] = userUniqueId
         }
     }
 
-    fun getUserName(key: String): Flow<String?> {
+    fun getUserName(): Flow<String?> {
         return context.userNameDataStore.data.map { preferences ->
-            preferences[stringPreferencesKey(key)] ?: ""
+            preferences[USER_NAME] ?: ""
         }
     }
 
-    suspend fun saveUserName(key: String, value: String) {
+    suspend fun saveUserName(userName: String) {
         context.userNameDataStore.edit { preferences ->
-            preferences[stringPreferencesKey(key)] = value
+            preferences[USER_NAME] = userName
         }
     }
 
-    fun getUserLastLocation(key: String): Flow<String?> {
-        return context.userLastLocation.data.map { preferences ->
-            preferences[stringPreferencesKey(key)] ?: ""
+    fun getGroupId(): Flow<String?> {
+        return context.currentGroupId.data.map { preferences ->
+            preferences[CURRENT_GROUP_ID] ?: ""
         }
     }
 
-    suspend fun saveUserLastLocation(key: String, value: String) {
-        context.userLastLocation.edit { preferences ->
-            preferences[stringPreferencesKey(key)] = value
+    suspend fun saveGroupId(groupId: String) {
+        context.currentGroupId.edit { preferences ->
+            preferences[CURRENT_GROUP_ID] = groupId
+        }
+    }
+
+    fun getUserSharingLocation(): Flow<Boolean?> {
+        return context.isSharingLocationStore.data.map { preferences ->
+            preferences[IS_SHARING_LOCATION] ?: false
+        }
+    }
+
+    suspend fun saveUserSharingLocation(isShare: Boolean) {
+        context.isSharingLocationStore.edit { preferences ->
+            preferences[IS_SHARING_LOCATION] = isShare
+        }
+    }
+
+    fun getGroupName(): Flow<String?> {
+        return context.currentGroupName.data.map { preferences ->
+            preferences[CURRENT_GROUP_NAME] ?: ""
+        }
+    }
+
+    suspend fun saveGroupName(groupName: String) {
+        context.currentGroupName.edit { preferences ->
+            preferences[CURRENT_GROUP_NAME] = groupName
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.example.multilocator.screens.home
 
+import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -31,12 +32,14 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,22 +50,29 @@ import com.example.multilocator.R
 import com.example.multilocator.model.DataOrException
 import com.example.multilocator.model.GroupInfo
 import com.example.multilocator.model.UserInfo
+import com.example.multilocator.screens.mapScreen.MapViewModel
+import com.example.multilocator.screens.viewModel.LocationViewModel
+import com.example.multilocator.screens.viewModel.UserUniqueIdViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun HomeScreenPager2(
     viewModel: HomeViewModel,
+    mapViewModel: MapViewModel,
+    locationViewModel: LocationViewModel,
+    userIdViewModel: UserUniqueIdViewModel,
     userGroups: State<DataOrException<List<String>?, Boolean, Exception>>,
     userGroupsInfo: State<DataOrException<List<GroupInfo>?, Boolean, Exception>>,
     getGroupUserWithName: State<DataOrException<Map<String, UserInfo>?, Boolean, Exception>>,
     pagerState1: PagerState,
-    onTrackGroup: (String, String) -> Unit,
+    onTrackGroup: () -> Unit,
 ) {
 
     val scope = rememberCoroutineScope()
     val showUsers = rememberSaveable { mutableStateOf(false) }
     val groupName = rememberSaveable { mutableStateOf("") }
+    val selectedGroup = mapViewModel.selectedGroup.collectAsState()
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -109,10 +119,18 @@ fun HomeScreenPager2(
                     items(items = userGroupsInfo.value.data?.reversed() ?: emptyList()) { group ->
                         GroupRow(
                             group = group,
+                            selectedGroup = selectedGroup,
                             showUsers = showUsers,
                             viewModel = viewModel,
                             onTrackGroup = { id, name ->
-                                onTrackGroup(id, name)
+                                mapViewModel.getUserLocationFromGroup(id)
+                                mapViewModel.setGroupName(id, name)
+                                userIdViewModel.saveGroupId(id)
+                                userIdViewModel.saveGroupName(name)
+                                onTrackGroup()
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    locationViewModel.startLocationUpdates()
+                                }
                             }
                         ) { _, name ->
                             viewModel.getGroupMembersWithNames(group.id.toString())
@@ -141,6 +159,7 @@ fun HomeScreenPager2(
 @Composable
 fun GroupRow(
     group: GroupInfo,
+    selectedGroup: State<String>,
     showUsers: MutableState<Boolean>,
     viewModel: HomeViewModel,
     onTrackGroup: (String, String) -> Unit,
@@ -151,7 +170,11 @@ fun GroupRow(
             .fillMaxWidth()
             .padding(horizontal = 10.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.background.copy(alpha = 0.4f))
+            .background(
+                if (selectedGroup.value == group.name) Color.Green.copy(alpha = 0.1f) else MaterialTheme.colorScheme.background.copy(
+                    alpha = 0.4f
+                )
+            )
             .padding(10.dp),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.Start

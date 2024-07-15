@@ -35,6 +35,10 @@ class MapViewModel @Inject constructor(
     val groupName: StateFlow<String>
         get() = _groupName
 
+    private val _selectedGroup = MutableStateFlow("")
+    val selectedGroup: StateFlow<String>
+        get() = _selectedGroup
+
     private val _groupId = MutableStateFlow("")
     val groupId: StateFlow<String>
         get() = _groupId
@@ -65,6 +69,7 @@ class MapViewModel @Inject constructor(
     fun setGroupName(groupId: String, groupName: String) {
         _groupId.value = groupId
         _groupName.value = groupName
+        _selectedGroup.value = groupName
     }
 
     fun updateUserLocation(uniqueId: String, location: LatLng, isSharingLocation: Boolean) {

@@ -73,7 +73,6 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.SubcomposeAsyncImage
 import com.example.multilocator.R
-import com.example.multilocator.components.utils.parseLatLong
 import com.example.multilocator.model.DataOrException
 import com.example.multilocator.model.GroupInfo
 import com.example.multilocator.model.User
@@ -82,6 +81,7 @@ import com.example.multilocator.screens.mapScreen.MapScreenPager
 import com.example.multilocator.screens.mapScreen.MapViewModel
 import com.example.multilocator.screens.mapScreen.PermissionEvent
 import com.example.multilocator.screens.mapScreen.ViewState
+import com.example.multilocator.screens.viewModel.LocationViewModel
 import com.example.multilocator.screens.viewModel.UserUniqueIdViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -100,7 +100,8 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = hiltViewModel(),
     mapViewModel: MapViewModel = hiltViewModel(),
-    userIdViewModel: UserUniqueIdViewModel = hiltViewModel()
+    userIdViewModel: UserUniqueIdViewModel = hiltViewModel(),
+    locationViewModel: LocationViewModel = hiltViewModel()
 ) {
     val userUniqueId = userIdViewModel.uniqueId.collectAsStateWithLifecycle()
 
@@ -127,6 +128,15 @@ fun HomeScreen(
     val getGroupUserWithName: State<DataOrException<Map<String, UserInfo>?, Boolean, Exception>> =
         viewModel.getGroupUserWithName.collectAsStateWithLifecycle()
 
+    val locationR = locationViewModel.location.collectAsStateWithLifecycle()
+
+    LaunchedEffect(key1 = locationR.value) {
+        Log.d("Composable", "Location R: ${locationR.value}")
+        currentLocation.value = LatLng(
+            locationR.value?.latitude ?: 0.0,
+            locationR.value?.longitude ?: 0.0
+        )
+    }
 
     LaunchedEffect(key1 = isOnline.value, key2 = userUniqueId.value) {
         if (isOnline.value && userUniqueId.value.isNotEmpty()) {
@@ -218,11 +228,13 @@ fun HomeScreen(
             }
 
             is ViewState.Success -> {
-                currentLocation.value = LatLng(
+                /*currentLocation.value = LatLng(
                     location?.latitude ?: 0.0,
                     location?.longitude ?: 0.0
-                )
+                )*/
             }
+
+            else -> {}
         }
     }
 
@@ -246,6 +258,8 @@ fun HomeScreen(
                     HomeScreenPager(
                         viewModel = viewModel,
                         mapViewModel = mapViewModel,
+                        locationViewModel = locationViewModel,
+                        userIdViewModel = userIdViewModel,
                         openAndPopUp = openAndPopUp,
                         openScreen = openScreen,
                         pagerState = pagerState,
@@ -256,10 +270,7 @@ fun HomeScreen(
                         getGroupUserWithName = getGroupUserWithName,
                         isOnline = isOnline,
                         userUniqueId = userUniqueId
-                    ) { groupId, groupName ->
-                        mapViewModel.getUserLocationFromGroup(groupId)
-                        mapViewModel.setGroupName(groupId, groupName)
-                    }
+                    )
                 }
 
                 1 -> {
@@ -274,7 +285,7 @@ fun HomeScreen(
         }
     }
 
-    LifecycleAwareComponent { event ->
+    ComposableLifecycle { _, event ->
         when (event) {
             Lifecycle.Event.ON_CREATE -> {}
             Lifecycle.Event.ON_START -> {}
@@ -369,6 +380,7 @@ fun UserRow(
     }
 }
 
+
 @Composable
 fun UidSearchField(
     userId: MutableState<String>,
@@ -423,20 +435,23 @@ fun UidSearchField(
 }
 
 @Composable
-fun LifecycleAwareComponent(
+fun ComposableLifecycle(
     lifecycleOwner: LifecycleOwner = LocalLifecycleOwner.current,
-    onEvent: (Lifecycle.Event) -> Unit
+    onEvent: (LifecycleOwner, Lifecycle.Event) -> Unit
 ) {
+
     DisposableEffect(lifecycleOwner) {
-        val observer = LifecycleEventObserver { _, event ->
-            onEvent(event)
+        val observer = LifecycleEventObserver { source, event ->
+            onEvent(source, event)
         }
         lifecycleOwner.lifecycle.addObserver(observer)
+
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
         }
     }
 }
+
 
 @Composable
 fun RationaleAlert(onDismiss: () -> Unit, onConfirm: () -> Unit) {

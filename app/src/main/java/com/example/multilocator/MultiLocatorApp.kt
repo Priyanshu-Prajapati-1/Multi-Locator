@@ -16,6 +16,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.example.multilocator.components.utils.Colors
 import com.example.multilocator.navigation.MultiLocatorScreens
 import com.example.multilocator.screens.account.AccountInfoScreen

@@ -427,6 +427,12 @@ class FireBaseRepository @Inject constructor() {
         groupId: String,
         onResult: (List<UpdateUserLocation>) -> Unit
     ) {
+
+        if (groupId.isEmpty()) {
+            onResult(emptyList())
+            return
+        }
+
         val reference = database.reference.child("groupLocation/$groupId")
 
         reference.addValueEventListener(object : ValueEventListener {

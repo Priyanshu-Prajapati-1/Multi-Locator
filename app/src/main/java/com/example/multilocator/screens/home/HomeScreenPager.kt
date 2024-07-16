@@ -2,6 +2,8 @@ package com.example.multilocator.screens.home
 
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
@@ -36,6 +39,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
@@ -81,35 +85,49 @@ fun HomeScreenPager(
 ) {
 
     val context = LocalContext.current
+    val pagerState1 = rememberPagerState(pageCount = { 2 })
 
     Scaffold(
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                shape = CircleShape,
-                containerColor = Color.Green.copy(alpha = 0.2f),
-                onClick = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(1)
-                    }
-                }
+            AnimatedVisibility(
+                visible = pagerState1.currentPage == 0,
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                TextButton(onClick = {
-                    locationViewModel.stopLocationUpdates()
-                    mapViewModel.setGroupName("", "")
-                    userIdViewModel.saveGroupId("")
-                    userIdViewModel.saveGroupName("")
-                }) {
-                    Text(
-                        text = "Untrack",
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Light
+                ExtendedFloatingActionButton(
+                    modifier = Modifier.height(45.dp),
+                    shape = CircleShape,
+                    containerColor = Color.Green.copy(alpha = 0.2f),
+                    onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(1)
+                        }
+                    }
+                ) {
+                    TextButton(onClick = {
+                        locationViewModel.stopLocationUpdates()
+                        mapViewModel.setGroupName("", "")
+                        userIdViewModel.saveGroupId("")
+                        userIdViewModel.saveGroupName("")
+                        userIdViewModel.saveUserSharingLocation(false)
+                    }) {
+                        Text(
+                            text = "Untrack",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.W400
+                        )
+                    }
+                    VerticalDivider(
+                        modifier = Modifier.padding(vertical = 4.dp, horizontal = 10.dp),
+                        thickness = 1.5.dp,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.4f)
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Default.ArrowForward,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.8f)
                     )
                 }
-                Spacer(modifier = Modifier.width(10.dp))
-                Icon(
-                    imageVector = Icons.AutoMirrored.Default.ArrowForward,
-                    contentDescription = null
-                )
             }
         },
         topBar = {
@@ -149,7 +167,6 @@ fun HomeScreenPager(
     ) { innerPadding ->
 
 
-        val pagerState1 = rememberPagerState(pageCount = { 2 })
         val fling = flingBehavior(
             state = pagerState1,
             pagerSnapDistance = PagerSnapDistance.atMost(2)

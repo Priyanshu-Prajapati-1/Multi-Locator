@@ -2,14 +2,17 @@ package com.example.multilocator.service.impl
 
 import android.Manifest
 import android.app.Notification
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.IBinder
 import android.os.Looper
 import android.util.Log
+import androidx.compose.ui.util.trace
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import com.example.multilocator.MultiLocatorActivity
@@ -45,6 +48,8 @@ class ForegroundLocationService : Service() {
     @Inject
     lateinit var userUniqueIdRepository: UserUniqueIdRepository
 
+    private lateinit var notificationBuilder: NotificationCompat.Builder
+
     private var userId: String = ""
     private var groupId: String = ""
     private var groupName: String = ""
@@ -60,6 +65,7 @@ class ForegroundLocationService : Service() {
         super.onCreate()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         createLocationCallback()
+        initializeNotificationBuilder()
 
         CoroutineScope(Dispatchers.IO).launch {
             combine(
@@ -84,6 +90,7 @@ class ForegroundLocationService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         requestLocationUpdates()
+        startForeground(NOTIFICATION_ID, getNotification())
         return START_STICKY
     }
 
@@ -94,7 +101,6 @@ class ForegroundLocationService : Service() {
                     location = lastLocation
                     // Handle the new location
                     handleNewLocation(lastLocation)
-                    startForeground(NOTIFICATION_ID, createNotification())
                 }
             }
         }
@@ -103,8 +109,8 @@ class ForegroundLocationService : Service() {
     private fun handleNewLocation(location: Location) {
         if (::repository.isInitialized) {
             repository.updateLocation(location)
+            updateNotification()
             if (isSharingLocation && groupId.isNotEmpty() && userId.isNotEmpty()) {
-                Log.d("work well", "var isSharingLocation")
                 updateUserLocationInGroup(
                     groupId = groupId,
                     userId = userId,
@@ -113,7 +119,9 @@ class ForegroundLocationService : Service() {
                     isSharingLocation = isSharingLocation
                 )
             } else {
-                updateUserSharingLocation(isSharingLocation)
+                if (groupId.isNotEmpty()) {
+                    updateUserSharingLocation(isSharingLocation)
+                }
             }
         } else {
             Log.e("repo isInitialized", "Repository not initialized")
@@ -129,7 +137,7 @@ class ForegroundLocationService : Service() {
             .setValue(isShare)
     }
 
-    private fun createNotification(): Notification {
+    /*private fun createNotification(): Notification {
         val notiIntent = Intent(this, MultiLocatorActivity::class.java)
         val pendingIntent =
             PendingIntent.getActivity(this, 0, notiIntent, PendingIntent.FLAG_IMMUTABLE)
@@ -137,14 +145,47 @@ class ForegroundLocationService : Service() {
         val notification = NotificationCompat.Builder(this, MultiLocatorHiltApp.CHANNEL_ID)
             .setContentTitle("Location")
             .setContentText(if (isSharingLocation && groupId.isNotEmpty()) "Sharing Location for\nGroup : $groupName" else "Not Sharing Location for anyone")
-            .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentIntent(pendingIntent)
+            .setSmallIcon(R.drawable.directions_run)
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setNotificationSilent()
             .setSound(null)
 
         return notification.build()
+    }*/
+
+    private fun initializeNotificationBuilder() {
+        val notiIntent = Intent(this, MultiLocatorActivity::class.java)
+        val pendingIntent =
+            PendingIntent.getActivity(this, 0, notiIntent, PendingIntent.FLAG_IMMUTABLE)
+
+        notificationBuilder = NotificationCompat.Builder(this, MultiLocatorHiltApp.CHANNEL_ID)
+            .setContentTitle("Location")
+            .setSmallIcon(R.drawable.directions_run)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setNotificationSilent()
+            .setSound(null)
+    }
+
+    private fun updateNotification() {
+        val contentText = if (isSharingLocation && groupId.isNotEmpty()) {
+            "Sharing Location for\nGroup : $groupName"
+        } else if (groupId.isNotEmpty()) {
+            "you track this group : $groupName"
+        } else {
+            ""
+        }
+
+        notificationBuilder.setContentText(contentText)
+
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build())
+    }
+
+    private fun getNotification(): Notification {
+        return notificationBuilder.build()
     }
 
     private fun requestLocationUpdates() {
@@ -190,7 +231,13 @@ class ForegroundLocationService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        Log.d("service", "destroy service")
+        // Remove the notification
+        val notificationManager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.cancel(NOTIFICATION_ID)
+
+        // Stop location updates
+        fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     companion object {

@@ -151,10 +151,15 @@ fun MapScreenPager(
         }
     }
 
-    LaunchedEffect(key1 = currentLocation.value, key2 = groupId.value) {
+    LaunchedEffect(key1 = groupId.value) {
+        if (groupId.value == "") {
+            mapViewModel.getUserLocationFromGroup(groupId.value)
+        }
+    }
+
+    /*LaunchedEffect(key1 = currentLocation.value, key2 = groupId.value) {
         if (isSharingLocation.value) {
             if (groupId.value != "") {
-                Log.d("MapScreenPager", "MapScreenPager: ${groupId.value}")
                 mapViewModel.updateUserLocationInGroup(
                     groupId = groupId.value,
                     userId = uniqueId.value,
@@ -164,7 +169,7 @@ fun MapScreenPager(
                 )
             }
         }
-    }
+    }*/
 
     LaunchedEffect(key1 = isSharingLocation.value) {
         mapViewModel.sharingLocation(uniqueId.value, isSharingLocation.value)
